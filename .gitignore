@@ -1,4 +1,9 @@
 research/.ipynb_checkpoints/
-research/samples/*
+research/samples/*.mp3
+research/samples/*.wav
 .idea/
 research/*.wav
+search_best/source/*.mp3
+search_best/source/*.wav
+search_best/source/tmp/
+*.ipynb
