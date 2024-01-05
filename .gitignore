@@ -7,3 +7,9 @@ search_best/source/*.mp3
 search_best/source/*.wav
 search_best/source/tmp/
 *.ipynb
+source/*.mp3
+source/*.wav
+source/tmp/*.mp3
+source/tmp/*.wav
+source/RazyebassGrave/
+*/__pycache__/

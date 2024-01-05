@@ -1,8 +1,7 @@
-import pygame as pg
 import random
 import time
 
-from app import *
+from game.game import Game
 
 ROWS_NUM = 10
 COLS_NUM = 10  # TODO: ряди и колонки наоборот
@@ -65,7 +64,7 @@ class ThreeInRow(Game):
             self.print_board()
             self.remove_cells = self.get_triplets()
             if len(self.remove_cells):
-                print("found triplet! ")
+                # print("found triplet! ")
                 self.is_exploding = True
         else:
             raise Exception(
@@ -143,7 +142,7 @@ class ThreeInRow(Game):
 
     def get_moves(self) -> list[str]:
         if self.is_exploding or self.is_falling:
-            return []
+            return ['']
 
         moves = []
 
@@ -153,11 +152,12 @@ class ThreeInRow(Game):
                     moves.append(f"{y} {x} {y+1} {x}")
                 if x + 1 < ROWS_NUM:
                     moves.append(f"{y} {x} {y} {x+1}")
-
+        if not moves:
+            return ['']
         return moves
 
     def show_game(self, start: int, end: int) -> list[str]:
-        pass
+        return self.GameState[start:end]
 
     # X, O, T
     def print_board(self):
@@ -168,7 +168,7 @@ class ThreeInRow(Game):
             ]
             self.gameState_string += "".join(mystring) + " "
 
-        print(self.gameState_string)
+        # print(self.gameState_string)
         # print()
 
 
@@ -179,16 +179,17 @@ class Gem:
         self.x = x
 
 
-g = ThreeInRow()
-g.print_board()
-# inp = input() # TODO: везде все наоборот, а не похуй ли?
-for i in range(25):
-    moves = g.get_moves()
-    if len(moves):
-        score = g.make_move(random.choice(moves))
-    else:
-        score = g.make_move("")
-    print(score)
-    print()
-    time.sleep(1)
-print(g.GameState)
+if __name__ == '__main__':
+    g = ThreeInRow()
+    g.print_board()
+    # inp = input() # TODO: везде все наоборот, а не похуй ли?
+    for i in range(25):
+        moves = g.get_moves()
+        if len(moves):
+            score = g.make_move(random.choice(moves))
+        else:
+            score = g.make_move("")
+        print(score)
+        print()
+        time.sleep(1)
+    print(g.GameState)
