@@ -1,16 +1,37 @@
-# This is a sample Python script.
+from os import listdir
+from os.path import isfile, join
+import time
 
-# Press F5 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from ThreeInRow.ThreeInRow import ThreeInRow
+from search_best.best_music_part_search import MusicSearcher
+from search_best.overlay_best_part import overlay
+from search_best.play_of_the_game_search import HighlightSearcher
+import sounddevice as sd
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def pipeline(source):
+    music_searcher = MusicSearcher(source)
+    beats = music_searcher.define_best_parts(normalize=True)
+    highlight_searcher = HighlightSearcher(ThreeInRow, len(beats))
+    best_score_game, best_combo_game = highlight_searcher.search()
+    snapshots = overlay(beats, best_score_game, highlight_len=50)
+    print(snapshots)
+    best_part_music_data = music_searcher.y[int(snapshots[0].beat_time * music_searcher.sr):int(
+        snapshots[-1].beat_time * music_searcher.sr)]
+    sd.play(best_part_music_data, music_searcher.sr)
+    start = time.time()
+    for snapshot in snapshots:
+        while True:
+            if time.time() - start > snapshot.video_time:
+                print(snapshot.game_position)
+                break
+            time.sleep(1e-6)
 
 
-# Press the green button in the gutter to run the script.
+def main():
+    mypath = input('source: ')
+    pipeline(mypath)
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    main()

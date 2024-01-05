@@ -57,7 +57,7 @@ class MusicSearcher(SlidingWindowMixin):
     def define_beats(self):
         bpm, beats = librosa.beat.beat_track(y=self.y, sr=self.sr)
         self._bpm = bpm
-        return librosa.frames_to_time(beats)
+        return librosa.frames_to_time(beats, sr=self.sr)
 
     @property
     def bpm(self):
@@ -76,7 +76,7 @@ class MusicSearcher(SlidingWindowMixin):
         """
         ae = self.amplitude_envelope()
         frames = range(0, ae.size)
-        t = librosa.frames_to_time(frames, hop_length=self.HOP_LENGTH)
+        t = librosa.frames_to_time(frames, sr=self.sr, hop_length=self.HOP_LENGTH)
         mean_arr = [0]
         n = 100
         for elems in self.sliding_window(ae, n):
