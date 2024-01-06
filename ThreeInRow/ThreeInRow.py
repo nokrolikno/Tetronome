@@ -7,7 +7,7 @@ ROWS_NUM = 10
 COLS_NUM = 10  # TODO: ряди и колонки наоборот
 GEM_SIZE = 60
 WIN_RES = WIN_W, WIN_H = ROWS_NUM * GEM_SIZE, COLS_NUM * GEM_SIZE
-COLORS = ["red", "green", "blue"]
+COLORS = ["red", "green", "blue", "magenta", "yellow"]
 
 
 class ThreeInRow(Game):
@@ -161,7 +161,7 @@ class ThreeInRow(Game):
 
     # X, O, T
     def print_board(self):
-        color_to_ascii = {"r": "X", "g": "O", "b": "T", "E": "_", "R": "R"}
+        color_to_ascii = {"r": "X", "g": "O", "b": "T", "m": "M", "y": "Y", "E": "_", "R": "R"}
         for i in range(ROWS_NUM):
             mystring = [
                 color_to_ascii[self.board[i][j].color[0]] for j in range(COLS_NUM)
