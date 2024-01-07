@@ -1,5 +1,3 @@
-from os import listdir
-from os.path import isfile, join
 import time
 
 from ThreeInRow.ThreeInRow import ThreeInRow
@@ -12,7 +10,7 @@ import sounddevice as sd
 def pipeline(source):
     music_searcher = MusicSearcher(source)
     beats = music_searcher.define_best_parts(normalize=True)
-    highlight_searcher = HighlightSearcher(ThreeInRow, len(beats))
+    highlight_searcher = HighlightSearcher(ThreeInRow, 1000)
     best_score_game, best_combo_game = highlight_searcher.search()
     snapshots = overlay(beats, best_score_game, highlight_len=50)
     print(snapshots)

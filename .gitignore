@@ -13,4 +13,5 @@ source/tmp/*.mp3
 source/tmp/*.wav
 source/RazyebassGrave/
 */__pycache__/
-ThreeInRow/images/
+ThreeInRow/images/*.png
+ThreeInRow/output.txt
