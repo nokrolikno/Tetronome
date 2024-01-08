@@ -158,7 +158,7 @@ class Engine:
         scoreSurfaceObj = self.score_font.render(f'Score: {self.score}', True, (0, 0, 0))
         scoreRectObj = scoreSurfaceObj.get_rect()
         scoreRectObj.topleft = (self.WIDTH // 4, self.y_margin // 4)
-        self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
+        #self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
         self.screen.blit(scoreSurfaceObj, scoreRectObj)
 
         myimage = p.image.load("images/chelibobes.png")
@@ -167,7 +167,7 @@ class Engine:
         self.screen.blit(myimage, imagerect)
 
     def draw_combo(self):
-        self.combo_font = p.font.Font('AlfaSlabOne-Regular.ttf', self.y_margin // 3 + int(self.combo[1:]))
+        self.combo_font = p.font.Font('AlfaSlabOne-Regular.ttf', self.y_margin // 10 + int(self.combo[1:]) * 2)
         self.cur_color = [self.cur_color[i] - int(self.color_diff[i] / 10) for i in range(3)]
         if int(self.combo_color_cnt) == 9:
             self.color_diff = [-self.color_diff[i] for i in range(3)]
@@ -185,8 +185,6 @@ class Engine:
         comboAddSurfaceObj = p.transform.rotate(comboAddSurfaceObj, self.cur_angle)
         comboRectObj = comboSurfaceObj.get_rect()
         comboAddRectObj = comboAddSurfaceObj.get_rect()
-        # p.draw.circle(self.screen, 'red', (self.WIDTH // 2 + self.x_around_circle,
-        #                                    self.y_margin + (self.cell_size * self.board_size_y) // 2 + self.y_around_circle), 5)
         comboRectObj.center = (self.WIDTH // 2 + self.x_around_circle,
                                self.y_margin + (self.cell_size * self.board_size_y) // 2 + self.y_around_circle)
         comboAddRectObj.center = (self.WIDTH // 2 + self.x_around_circle // 1.5,
@@ -333,16 +331,16 @@ class Engine:
         self.previous_board = board
 
     def update_until_beat(self):
-        self.screen.fill(self.BACKGROUND_COLOR)
+
         for i in range(20):
+            self.screen.fill(self.BACKGROUND_COLOR)
             self.gems.update()
             self.draw_score()
             self.draw_grid()
             self.gems.draw(self.screen)
             self.clock.tick(FPS)
 
-            if self.combo != 'x1':
-                self.draw_combo()
+            self.draw_combo()
 
             p.display.flip()
 
