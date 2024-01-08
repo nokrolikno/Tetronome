@@ -112,7 +112,6 @@ class Engine:
         imagerect.topleft = (-75, self.HEIGHT * 2 // 3)
         self.screen.blit(myimage, imagerect)
 
-
         for i in range(board_size_x):
             col = []
             for j in range(board_size_y):
@@ -137,7 +136,6 @@ class Engine:
         scoreRectObj.topleft = (self.WIDTH // 4, self.y_margin // 4)
         self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
         self.screen.blit(scoreSurfaceObj, scoreRectObj)
-
 
     def draw_grid(self):
         for i in range(self.board_size_x):
