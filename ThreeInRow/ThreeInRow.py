@@ -154,9 +154,11 @@ class ThreeInRow(Game):
         for y in range(COLS_NUM):
             for x in range(ROWS_NUM):
                 if y + 1 < COLS_NUM:
-                    moves.append(f"{y} {x} {y+1} {x}")
+                    if self.board[y][x].color != self.board[y+1][x]:
+                        moves.append(f"{y} {x} {y+1} {x}")
                 if x + 1 < ROWS_NUM:
-                    moves.append(f"{y} {x} {y} {x+1}")
+                    if self.board[y][x].color != self.board[y][x+1]:
+                        moves.append(f"{y} {x} {y} {x+1}")
         if not moves:
             return ['']
         return moves
