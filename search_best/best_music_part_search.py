@@ -17,7 +17,7 @@ class Beat:
 class SlidingWindowMixin:
     @staticmethod
     def sliding_window(iterable, n):
-        "Collect data into overlapping fixed-length chunks or blocks."
+        'Collect data into overlapping fixed-length chunks or blocks.'
         # sliding_window('ABCDEFG', 4) --> ABCD BCDE CDEF DEFG
         it = iter(iterable)
         window = collections.deque(islice(it, n - 1), maxlen=n)
@@ -34,11 +34,11 @@ class MusicSearcher(SlidingWindowMixin):
         self.source = 'source/' + source
         self.is_mp3 = False
         if source.endswith('.mp3'):
-            if not os.path.isdir("source/tmp"):
-                os.mkdir("source/tmp")
+            if not os.path.isdir('source/tmp'):
+                os.mkdir('source/tmp')
             sound = AudioSegment.from_mp3(self.source)
             self.source = 'source/tmp/' + source[:-3] + 'wav'
-            sound.export(self.source, format="wav")
+            sound.export(self.source, format='wav')
             self.is_mp3 = True
 
         y, sr = librosa.load(self.source, sr=44100)
@@ -50,7 +50,7 @@ class MusicSearcher(SlidingWindowMixin):
     def amplitude_envelope(self):
         amplitude_envelope = []
         for i in range(0, len(self.y), self.HOP_LENGTH):
-            current_frame_amplitude_envelope = max(self.y[i:i + self.FRAME_SIZE])
+            current_frame_amplitude_envelope = max(self.y[i : i + self.FRAME_SIZE])
             amplitude_envelope.append(current_frame_amplitude_envelope)
         return np.array(amplitude_envelope)
 

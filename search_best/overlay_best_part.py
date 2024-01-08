@@ -12,7 +12,6 @@ class Snapshot:
 
 
 def overlay(beats: list[Beat], game: BestGame, highlight_len: int = 50) -> list[Snapshot]:
-
     best_beat_index = 0
     best_beat_coolness = -999
     best_game_index = 0
@@ -55,9 +54,9 @@ def overlay(beats: list[Beat], game: BestGame, highlight_len: int = 50) -> list[
     overlayed_highlight = []
     game_positions = game.game.show_game(start_highlight_index, end_highlight_index)
     for beat_index, highlight_index, game_pos in zip(
-            range(start_beats_index, end_beats_index),
-            range(start_highlight_index, end_highlight_index),
-            game_positions,
+        range(start_beats_index, end_beats_index),
+        range(start_highlight_index, end_highlight_index),
+        game_positions,
     ):
         snapshot = Snapshot(
             beat_time=beats[beat_index].beat_time,
@@ -66,4 +65,3 @@ def overlay(beats: list[Beat], game: BestGame, highlight_len: int = 50) -> list[
         )
         overlayed_highlight.append(snapshot)
     return overlayed_highlight
-
