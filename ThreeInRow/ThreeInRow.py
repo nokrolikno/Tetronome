@@ -18,6 +18,7 @@ class ThreeInRow(Game):
         self.remove_cells = []
         self.gameState_string = ""
         self.GameState = []
+        self.combo = 1
         # create full random board which will be fully overridden, not empty just for warning evasion
         self.board = [
             [Gem(i, j, random.choice(COLORS)) for i in range(COLS_NUM)]
@@ -43,14 +44,15 @@ class ThreeInRow(Game):
 
         if self.is_exploding:
             set1 = map(tuple, self.remove_cells)
-            score = len(set(set1))
+            self.combo *= 2
+            score = len(set(set1)) * self.combo
             self.explode()
 
-            self.gameState_string += "exploded! "
+            self.gameState_string += "exploded! " + str(score) + " x" + str(self.combo) + " "
             self.print_board()
         elif self.is_falling:
             self.fall()
-            self.gameState_string += "fell! "
+            self.gameState_string += "fell! " + str(score) + " x" + str(self.combo) + " "
             self.print_board()
             self.remove_cells = self.get_triplets()
             if len(self.remove_cells):
@@ -62,7 +64,8 @@ class ThreeInRow(Game):
                 self.board[x2][y2],
                 self.board[x1][y1],
             )
-            self.gameState_string += "moved! "
+            self.combo = 1
+            self.gameState_string += "moved! " + str(score) + " x" + str(self.combo) + " "
             self.print_board()
             self.remove_cells = self.get_triplets()
             if len(self.remove_cells):
