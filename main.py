@@ -14,8 +14,9 @@ def pipeline(source):
     best_score_game, best_combo_game = highlight_searcher.search()
     snapshots = overlay(beats, best_score_game, highlight_len=50)
     print(snapshots)
-    best_part_music_data = music_searcher.y[int(snapshots[0].beat_time * music_searcher.sr):int(
-        snapshots[-1].beat_time * music_searcher.sr)]
+    best_part_music_data = music_searcher.y[
+        int(snapshots[0].beat_time * music_searcher.sr) : int(snapshots[-1].beat_time * music_searcher.sr)
+    ]
     sd.play(best_part_music_data, music_searcher.sr)
     start = time.time()
     for snapshot in snapshots:
