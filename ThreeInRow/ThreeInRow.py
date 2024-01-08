@@ -35,6 +35,8 @@ class ThreeInRow(Game):
                         if self.board[y][x - 2].color in good_colors:
                             good_colors.remove(self.board[y][x - 2].color)
                 self.board[y][x] = Gem(y, x, random.choice(good_colors))
+        self.gameState_string += "moved! "
+        self.print_board()
 
     def make_move(self, move: str) -> int:
         score = 0
@@ -54,7 +56,7 @@ class ThreeInRow(Game):
             self.print_board()
             self.remove_cells = self.get_triplets()
             if len(self.remove_cells):
-                self.gameState_string += "found triplet! "
+                #self.gameState_string += "found triplet! "
                 self.is_exploding = True
         elif move != "":
             x1, y1, x2, y2 = [int(i) for i in move.split()]  # TODO: swap y & x
@@ -63,11 +65,11 @@ class ThreeInRow(Game):
                 self.board[x1][y1],
             )
             self.combo = 1
-            self.gameState_string += "made move! " + str(score) + " x" + str(self.combo) + " "
+            self.gameState_string += "moved! " + str(score) + " x" + str(self.combo) + " "
             self.print_board()
             self.remove_cells = self.get_triplets()
             if len(self.remove_cells):
-                # print("found triplet! ")
+                #self.gameState_string += "found triplet! "
                 self.is_exploding = True
         else:
             raise Exception(
@@ -171,7 +173,7 @@ class ThreeInRow(Game):
             ]
             self.gameState_string += "".join(mystring) + " "
 
-        # print(self.gameState_string)
+        #print(self.gameState_string)
         # print()
 
 
@@ -193,6 +195,9 @@ if __name__ == '__main__':
         else:
             score = g.make_move("")
         print(score)
-        print()
         time.sleep(1)
+    with open(r'output.txt', 'w') as fp:
+        for item in g.GameState:
+            fp.write("%s\n" % item)
+        print('Done')
     print(g.GameState)
