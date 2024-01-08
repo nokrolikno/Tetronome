@@ -15,3 +15,7 @@ source/RazyebassGrave/
 */__pycache__/
 ThreeInRow/images/*.png
 ThreeInRow/output.txt
+ThreeInRow/tmp_vid/*.png
+ThreeInRow/*.mp3
+ThreeInRow/*.wav
+ThreeInRow/*.mp4
