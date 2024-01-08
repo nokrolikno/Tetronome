@@ -7,7 +7,7 @@ import re
 
 ascii_to_sprite = {"X": "cherry", "O": "chockolate", "T": "cupcake", "Y": 'donut', 'M': 'lollipop'}
 
-FPS = 30
+FPS = 46
 BASE_IMG_DIR = 'images/'
 
 
@@ -32,9 +32,13 @@ class Gem(p.sprite.Sprite):
         self.a_x, self.a_y, self.b_x, self.b_y = 0, 0, 0, 0
         self.moving_state = 0
         self.dying_state = 0
+        self.action_ticks = 20
 
     def moving_function(self, x):
         return -1.5 * x**2 + 2.5 * x
+
+    def set_action_ticks(self, ticks: int):
+        self.action_ticks = ticks
 
     def update(self):
         if self.action == 'stationary':
@@ -49,7 +53,7 @@ class Gem(p.sprite.Sprite):
                 )
         elif self.action == 'moving':
             self.moving_state += 1
-            if self.moving_state >= 10:
+            if self.moving_state >= self.action_ticks:
                 self.action = 'stationary'
             start_center_x, start_center_y = (
                 self.a_x + self.cell_size // 2,
@@ -60,17 +64,17 @@ class Gem(p.sprite.Sprite):
                 self.b_y + self.cell_size // 2,
             )
             new_center_x = start_center_x + int(
-                (end_center_x - start_center_x) * self.moving_function(self.moving_state / 10)
+                (end_center_x - start_center_x) * self.moving_function(self.moving_state / self.action_ticks)
             )
             new_center_y = start_center_y + int(
-                (end_center_y - start_center_y) * self.moving_function(self.moving_state / 10)
+                (end_center_y - start_center_y) * self.moving_function(self.moving_state / self.action_ticks)
             )
             self.rect = self.image.get_rect(center=(new_center_x, new_center_y))
         elif self.action == 'dying':
             self.dying_state += 1
-            if self.dying_state >= 10:
+            if self.dying_state >= self.action_ticks:
                 self.kill()
-            transparency = 128
+            transparency = 180
             self.image.fill((255, 255, 255, transparency), special_flags=p.BLEND_RGBA_MULT)
 
     def move(self, a_x, a_y, b_x, b_y):
@@ -91,7 +95,7 @@ class Engine:
     BACKGROUND_COLOR = (255, 192, 203)
     GRID_THICKNESS = 5
 
-    def __init__(self, board_size_x, board_size_y, x_margin, y_margin, init_board):
+    def __init__(self, board_size_x, board_size_y, x_margin, y_margin, init_board, tmp_vid_folder='tmp_vid/'):
         p.init()
         self.board_size_x = board_size_x
         self.board_size_y = board_size_y
@@ -104,6 +108,7 @@ class Engine:
         self.gems = p.sprite.Group()
         self.board = []
         self.score = random.randint(10, 1000)
+        self.current_frame = 0
 
         self.score_font = fontObj = p.font.Font('AlfaSlabOne-Regular.ttf', y_margin // 2)
 
@@ -259,16 +264,51 @@ class Engine:
         self.previous_board = board
 
     def update_until_beat(self):
-        for i in range(20):
+        for i in range(FPS):
             self.gems.update()
             self.draw_score()
             self.draw_grid()
             self.gems.draw(self.screen)
             self.clock.tick(FPS)
             p.display.flip()
+            p.image.save(self.screen, 'tmp_vid/{:05d}.png'.format(self.current_frame))
+            self.current_frame += 1
+
+
+# def make_frames(game_filename, tmp_vid_folder, bpm):
+#     folder_path = tmp_vid_folder
+#     global FPS
+#     FPS = bpm * 10 // 3
+#
+#     all_tmp_vid = os.listdir(folder_path)
+#
+#     for images in all_tmp_vid:
+#         if images.endswith(".png"):
+#             os.remove(os.path.join(folder_path, images))
+#     with open(game_filename, 'r') as file:
+#         lines = file.readlines()
+#     parts = lines[0].strip().split()
+#     board = parts[3:]
+#     engine = Engine(len(board[0]), len(board), 20, 100, board, tmp_vid_folder=tmp_vid_folder)
+#     for line in lines[1:]:
+#         for e in p.event.get():
+#             if e.type == p.QUIT:
+#                 running = False
+#         parts = line.strip().split()
+#         move_description, score, combo, *board = parts
+#         engine.make_move(move_description, score, combo, board)
+#         engine.clock.tick(FPS)
+#         p.display.flip()
 
 
 def main():
+    folder_path = './tmp_vid/'
+
+    all_tmp_vid = os.listdir(folder_path)
+
+    for images in all_tmp_vid:
+        if images.endswith(".png"):
+            os.remove(os.path.join(folder_path, images))
     with open('output.txt', 'r') as file:
         lines = file.readlines()
     parts = lines[0].strip().split()
