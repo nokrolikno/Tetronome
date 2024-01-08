@@ -5,8 +5,7 @@ import os
 import re
 
 
-ascii_to_color = {'X': 'red', 'O': 'green', 'T': 'blue', '_': 'black'}
-ascii_to_sprite = {'X': 'cherry', 'O': 'chockolate', 'T': 'cupcake'}
+ascii_to_sprite = {"X": "cherry", "O": "chockolate", "T": "cupcake", "Y": 'donut', 'M': 'lollipop'}
 
 FPS = 30
 BASE_IMG_DIR = 'images/'
