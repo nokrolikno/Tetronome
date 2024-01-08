@@ -6,7 +6,7 @@ import re
 
 
 ascii_to_color = {"X": "red", "O": "green", "T": "blue", "_": "black"}
-ascii_to_sprite = {"X": "cherry", "O": "chockolate", "T": "cupcake"}
+ascii_to_sprite = {"X": "cherry", "O": "chockolate", "T": "cupcake", "Y": 'donut', 'M': 'lollipop'}
 
 FPS = 30
 BASE_IMG_DIR = "images/"
@@ -112,6 +112,16 @@ class Engine:
         self.screen.fill(self.BACKGROUND_COLOR)
         self.gems = p.sprite.Group()
         self.board = []
+        self.score = random.randint(10, 1000)
+
+        self.score_font = fontObj = p.font.Font('AlfaSlabOne-Regular.ttf', y_margin // 2)
+
+        myimage = p.image.load("images/chelibobes.png")
+        imagerect = myimage.get_rect()
+        imagerect.topleft = (-75, self.HEIGHT * 2 // 3)
+        self.screen.blit(myimage, imagerect)
+
+
         for i in range(board_size_x):
             col = []
             for j in range(board_size_y):
@@ -129,6 +139,14 @@ class Engine:
             self.board.append(col)
         self.previous_board = init_board
         self.draw_grid()
+
+    def draw_score(self):
+        scoreSurfaceObj = self.score_font.render(f'Score: {self.score}', True, (0, 0, 0))
+        scoreRectObj = scoreSurfaceObj.get_rect()
+        scoreRectObj.topleft = (self.WIDTH // 4, self.y_margin // 4)
+        self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
+        self.screen.blit(scoreSurfaceObj, scoreRectObj)
+
 
     def draw_grid(self):
         for i in range(self.board_size_x):
@@ -249,7 +267,8 @@ class Engine:
                         self.y_margin + self.cell_size * j,
                     )
 
-    def make_move(self, move_description, board):
+    def make_move(self, move_description, score, combo, board):
+        self.score += int(score)
         if move_description == "moved!":
             self.move_gems(self.previous_board, board)
         elif move_description == "exploded!":
@@ -262,6 +281,7 @@ class Engine:
     def update_until_beat(self):
         for i in range(20):
             self.gems.update()
+            self.draw_score()
             self.draw_grid()
             self.gems.draw(self.screen)
             self.clock.tick(FPS)
@@ -272,15 +292,15 @@ def main():
     with open("output.txt", "r") as file:
         lines = file.readlines()
     parts = lines[0].strip().split()
-    _, board = parts[0], parts[1:]
+    board = parts[3:]
     engine = Engine(len(board[0]), len(board), 20, 100, board)
     for line in lines[1:]:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
         parts = line.strip().split()
-        move_description, board = parts[0], parts[1:]
-        engine.make_move(move_description, board)
+        move_description, score, combo, *board = parts
+        engine.make_move(move_description, score, combo, board)
         engine.clock.tick(FPS)
         p.display.flip()
 
