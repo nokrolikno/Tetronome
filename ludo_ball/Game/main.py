@@ -2,12 +2,24 @@ import pygame as pg
 import pygame.draw
 
 import pymunk.pygame_util
-from pymunk import Circle, Body, moment_for_circle, Poly
+from pymunk import Circle, Body, moment_for_circle
 from random import randrange
 
 from source import DynamicGame
 
 pymunk.pygame_util.positive_y_is_up = False
+
+VAL_COL_DICT = {
+    '0.1': (136, 69, 53, 0),
+    '0.25': (250, 210, 1, 0),
+    '0.5': (245, 119, 10, 0),
+    '2': (77, 93, 83, 0),
+    '2.5': (77, 93, 83, 0),
+    '5': (77, 93, 83, 0),
+    '20': (77, 93, 83, 0),
+    '100': (77, 93, 83, 0),
+    '1000': (77, 93, 83, 0),
+}
 
 
 class Gaussian_Lud:
@@ -25,16 +37,21 @@ class Gaussian_Lud:
         self.offset_x = self.offset_y = self.pin_radius * 2 * 3
 
         # For boxes
-        self.n_boxes = 17
-        self.
+        self.n_boxes = self.n_pin_rows + 1
+        self.box_side = 0.9 * self.offset_x
 
         # For luda-ball
         self.ball_mass = 1
         self.ball_radius = self.pin_radius * 1.5
 
         self.board = []
+        self.borders = []
+        self.x_boxes = []
 
-    def coords_generator(self):
+        self.border_elasticity = .8
+        self.border_friction = 1
+
+    def pyramid_coords_generator(self):
 
         running_y = int(self.height * 0.15)
         row_start = self.center - self.offset_x
@@ -50,13 +67,52 @@ class Gaussian_Lud:
             row_start -= self.offset_x / 2
             running_y += self.offset_y
 
+    def xboxes_coords_generator(self, x, y):
+
+        running_x = x + self.offset_x // 2
+        y += self.box_side
+
+        for _ in range(self.n_boxes):
+            yield running_x, y
+            running_x += self.offset_x
+
     def fill_board(self):
 
-        for x, y in self.coords_generator():
+        # Pins
+        row = []
+        for x, y in self.pyramid_coords_generator():
             pin = Pin(x, y, self.pin_radius)
-            self.board.append(Pin(x, y, self.pin_radius))
             pin.insert_pin(self.space)
+            if len(row) > 1 and pin.y != row[-1].y:
+                self.board.append(row)
+                row = [pin]
+                continue
+            row.append(pin)
+        self.board.append(row)
 
+        # Borders
+        left_border = pymunk.Segment(body=self.space.static_body,
+                                     a=(self.board[0][0].x - self.offset_x // 2, self.board[0][0].y),
+                                     b=(self.board[-1][0].x - self.offset_x // 2, self.board[-1][0].y),
+                                     radius=self.pin_radius // 2)
+
+        right_border = pymunk.Segment(body=self.space.static_body,
+                                      a=(self.board[0][-1].x + self.offset_x // 2, self.board[0][0].y),
+                                      b=(self.board[-1][-1].x + self.offset_x // 2, self.board[-1][0].y),
+                                      radius=self.pin_radius // 2)
+
+        self.borders.extend([left_border, right_border])
+
+        self.space.add(left_border)
+        self.space.add(right_border)
+        left_border.elasticity = self.border_elasticity
+        right_border.friction = self.border_friction
+
+        # X-boxes
+        for x, y in self.xboxes_coords_generator(self.board[-1][0].x, self.board[-1][0].y):
+            box = XBox(x, y, self.box_side, 0.5)
+            self.x_boxes.append(box)
+            box.insert_box(self.space)
 
 
 
@@ -69,7 +125,6 @@ class Gaussian_Lud:
         ball_shape.friction = 1.0
         ball_shape.color = [randrange(256) for i in range(4)]
         self.space.add(ball_body, ball_shape)
-
 
 
 class Pin:
@@ -113,22 +168,34 @@ class Pin:
         self.shape.friction = self.friction
         self.shape.color = self.color
 
-
-
     def insert_pin(self, space):
         space.add(self.body, self.shape)
-        # pygame.draw.circle(surface=display,
-        #                    color=self.color,
-        #                    center=self.body.position,
-        #                    radius=self.radius)
 
 
-class X_box:
+class XBox:
 
-    def __init__(self, x, y, value):
+    def __init__(self, x, y, side, value):
         self.x = x
         self.y = y
+        self.side = side
         self.value = value
+        self.elasticity = .3
+        self.friction = 1.0
+
+        self.color = VAL_COL_DICT[str(self.value)]
+
+        # Initializing essential Body and Shape abstractions
+        self.body = Body(body_type=Body.STATIC)
+        self.body.position = (self.x, self.y)
+
+        self.shape = pymunk.Poly.create_box(self.body, (self.side, self.side))
+        self.shape.color = self.color
+        self.shape.elasticity = self.elasticity
+        self.shape.friction = self.friction
+
+    def insert_box(self, space):
+        space.add(self.body, self.shape)
+
 
 
 
