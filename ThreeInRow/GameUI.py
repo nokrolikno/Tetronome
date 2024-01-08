@@ -162,7 +162,7 @@ class Engine:
         self.screen.blit(myimage, imagerect)
 
     def draw_combo(self):
-        self.combo_font = p.font.Font('AlfaSlabOne-Regular.ttf', self.y_margin // 10 + int(self.combo[1:]) * 2)
+        self.combo_font = p.font.Font('AlfaSlabOne-Regular.ttf', min(self.y_margin // 10 + int(self.combo[1:]) * 2, 72))
         self.cur_color = [self.cur_color[i] - int(self.color_diff[i] / 10) for i in range(3)]
         if int(self.combo_color_cnt) == 9:
             self.color_diff = [-self.color_diff[i] for i in range(3)]
