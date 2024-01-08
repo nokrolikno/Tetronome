@@ -3,7 +3,7 @@ import random
 import time
 import os
 import re
-
+import math
 
 ascii_to_sprite = {"X": "cherry", "O": "chockolate", "T": "cupcake", "Y": 'donut', 'M': 'lollipop'}
 
@@ -94,6 +94,10 @@ class Engine:
     CELL_COLOR_B = (153, 153, 153)
     BACKGROUND_COLOR = (255, 192, 203)
     GRID_THICKNESS = 5
+    COMBO_COLORS = [(39, 253, 245), (247, 101, 184)]
+    TIN_COLOR = COMBO_COLORS[0]
+    PINK_COLOR = COMBO_COLORS[1]
+
 
     def __init__(self, board_size_x, board_size_y, x_margin, y_margin, init_board, tmp_vid_folder='tmp_vid/'):
         p.init()
@@ -102,21 +106,31 @@ class Engine:
         self.x_margin = x_margin
         self.y_margin = y_margin
         self.cell_size = (self.WIDTH - 2 * self.x_margin) // self.board_size_x
+        self.center = self.WIDTH // 2, self.y_margin + (self.cell_size * self.board_size_y) // 2
+
         self.screen = p.display.set_mode((self.WIDTH, self.HEIGHT))
         self.clock = p.time.Clock()
         self.screen.fill(self.BACKGROUND_COLOR)
         self.gems = p.sprite.Group()
         self.board = []
+
+        # Score & Combo stuff
         self.score = random.randint(10, 1000)
         self.current_frame = 0
+        self.combo = 'x1'
+        self.color_diff = [self.TIN_COLOR[i] - self.PINK_COLOR[i] for i in range(3)]
+        self.cur_color = self.TIN_COLOR
+        self.cur_angle = 0
+        self.combo_color_cnt = 0
+        self.combo_angle_add = 1
 
-        self.score_font = fontObj = p.font.Font('AlfaSlabOne-Regular.ttf', y_margin // 2)
+        self.score_font = p.font.Font('AlfaSlabOne-Regular.ttf', y_margin // 2)
+        self.combo_font = p.font.Font('AlfaSlabOne-Regular.ttf', y_margin // 2)
 
-        myimage = p.image.load("images/chelibobes.png")
-        imagerect = myimage.get_rect()
-        imagerect.topleft = (-75, self.HEIGHT * 2 // 3)
-        self.screen.blit(myimage, imagerect)
-
+        # Add rotation around point for Combo (no kak?)
+        self.x_around_circle = 0
+        self.x_around_add = 1
+        self.y_around_circle = 10
         for i in range(board_size_x):
             col = []
             for j in range(board_size_y):
@@ -139,8 +153,46 @@ class Engine:
         scoreSurfaceObj = self.score_font.render(f'Score: {self.score}', True, (0, 0, 0))
         scoreRectObj = scoreSurfaceObj.get_rect()
         scoreRectObj.topleft = (self.WIDTH // 4, self.y_margin // 4)
-        self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
+        #self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
         self.screen.blit(scoreSurfaceObj, scoreRectObj)
+
+        myimage = p.image.load("images/chelibobes.png")
+        imagerect = myimage.get_rect()
+        imagerect.topleft = (-75, self.HEIGHT * 2 // 3)
+        self.screen.blit(myimage, imagerect)
+
+    def draw_combo(self):
+        self.combo_font = p.font.Font('AlfaSlabOne-Regular.ttf', self.y_margin // 10 + int(self.combo[1:]) * 2)
+        self.cur_color = [self.cur_color[i] - int(self.color_diff[i] / 10) for i in range(3)]
+        if int(self.combo_color_cnt) == 9:
+            self.color_diff = [-self.color_diff[i] for i in range(3)]
+            self.combo_color_cnt = 0
+
+        if abs(self.cur_angle) == 15:
+            self.combo_angle_add *= -1
+
+        if round(abs(self.x_around_circle)) == 10:
+            self.x_around_add *= -1
+
+        comboSurfaceObj = self.combo_font.render(f'COMBO!!: {self.combo}', True, self.cur_color)
+        comboAddSurfaceObj = self.combo_font.render(f'COMBO!!: {self.combo}', True, 'black')
+        comboSurfaceObj = p.transform.rotate(comboSurfaceObj, self.cur_angle)
+        comboAddSurfaceObj = p.transform.rotate(comboAddSurfaceObj, self.cur_angle)
+        comboRectObj = comboSurfaceObj.get_rect()
+        comboAddRectObj = comboAddSurfaceObj.get_rect()
+        comboRectObj.center = (self.WIDTH // 2 + self.x_around_circle,
+                               self.y_margin + (self.cell_size * self.board_size_y) // 2 + self.y_around_circle)
+        comboAddRectObj.center = (self.WIDTH // 2 + self.x_around_circle // 1.5,
+                               self.y_margin + (self.cell_size * self.board_size_y) // 2 + self.y_around_circle // 1.5)
+
+        self.screen.blit(comboSurfaceObj, comboRectObj)
+        self.screen.blit(comboAddSurfaceObj, comboAddRectObj)
+        self.combo_color_cnt += 1
+        self.cur_angle += self.combo_angle_add
+        self.x_around_circle += self.x_around_add
+        y_pos = math.sqrt(100 - min(self.x_around_circle ** 2, 100))
+
+        self.y_around_circle = y_pos if self.x_around_add == 1 else - y_pos
 
     def draw_grid(self):
         for i in range(self.board_size_x):
@@ -254,6 +306,7 @@ class Engine:
 
     def make_move(self, move_description, score, combo, board):
         self.score += int(score)
+        self.combo = combo
         if move_description == 'moved!':
             self.move_gems(self.previous_board, board)
         elif move_description == 'exploded!':
@@ -264,12 +317,17 @@ class Engine:
         self.previous_board = board
 
     def update_until_beat(self):
+
         for i in range(FPS):
+            self.screen.fill(self.BACKGROUND_COLOR)
             self.gems.update()
             self.draw_score()
             self.draw_grid()
             self.gems.draw(self.screen)
             self.clock.tick(FPS)
+
+            self.draw_combo()
+
             p.display.flip()
             p.image.save(self.screen, 'tmp_vid/{:05d}.png'.format(self.current_frame))
             self.current_frame += 1

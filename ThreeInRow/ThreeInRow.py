@@ -152,13 +152,20 @@ class ThreeInRow(Game):
             for x in range(ROWS_NUM):
                 if y + 1 < COLS_NUM:
                     if self.board[y][x].color != self.board[y + 1][x].color:
-                        moves.append(f'{y} {x} {y+1} {x}')
+                        self.board[y][x].color, self.board[y + 1][x].color = self.board[y + 1][x].color, self.board[y][x].color
+                        if len(self.get_triplets()) > 0:
+                            moves.append(f'{y} {x} {y+1} {x}')
+                        self.board[y][x].color, self.board[y + 1][x].color = self.board[y + 1][x].color, self.board[y][x].color
                 if x + 1 < ROWS_NUM:
                     if self.board[y][x].color != self.board[y][x + 1].color:
-                        moves.append(f'{y} {x} {y} {x+1}')
+                        self.board[y][x].color, self.board[y][x + 1].color = self.board[y][x + 1].color, self.board[y][x].color
+                        if len(self.get_triplets()) > 0:
+                            moves.append(f'{y} {x} {y} {x+1}')
+                        self.board[y][x].color, self.board[y][x + 1].color = self.board[y][x + 1].color, self.board[y][x].color
         if not moves:
             return ['']
         return moves
+
 
     def show_game(self, start: int, end: int) -> list[str]:
         return self.GameState[start:end]
