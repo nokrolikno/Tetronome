@@ -7,7 +7,7 @@ ROWS_NUM = 10
 COLS_NUM = 10  # TODO: ряди и колонки наоборот
 GEM_SIZE = 60
 WIN_RES = WIN_W, WIN_H = ROWS_NUM * GEM_SIZE, COLS_NUM * GEM_SIZE
-COLORS = ["red", "green", "blue", "magenta", "yellow"]
+COLORS = ['red', 'green', 'blue', 'magenta', 'yellow']
 
 
 class ThreeInRow(Game):
@@ -16,14 +16,11 @@ class ThreeInRow(Game):
         self.is_exploding = False
         self.is_falling = False
         self.remove_cells = []
-        self.gameState_string = ""
+        self.gameState_string = ''
         self.GameState = []
         self.combo = 1
         # create full random board which will be fully overridden, not empty just for warning evasion
-        self.board = [
-            [Gem(i, j, random.choice(COLORS)) for i in range(COLS_NUM)]
-            for j in range(ROWS_NUM)
-        ]
+        self.board = [[Gem(i, j, random.choice(COLORS)) for i in range(COLS_NUM)] for j in range(ROWS_NUM)]
         for y in range(COLS_NUM):
             for x in range(ROWS_NUM):
                 good_colors = COLORS.copy()
@@ -35,12 +32,12 @@ class ThreeInRow(Game):
                         if self.board[y][x - 2].color in good_colors:
                             good_colors.remove(self.board[y][x - 2].color)
                 self.board[y][x] = Gem(y, x, random.choice(good_colors))
-        self.gameState_string += "moved! "
+        self.gameState_string += 'moved! '
         self.print_board()
 
     def make_move(self, move: str) -> int:
         score = 0
-        self.gameState_string = ""
+        self.gameState_string = ''
 
         if self.is_exploding:
             set1 = map(tuple, self.remove_cells)
@@ -48,34 +45,34 @@ class ThreeInRow(Game):
             score = len(set(set1)) * self.combo
             self.explode()
 
-            self.gameState_string += "exploded! " + str(score) + " x" + str(self.combo) + " "
+            self.gameState_string += 'exploded! ' + str(score) + ' x' + str(self.combo) + ' '
             self.print_board()
         elif self.is_falling:
             self.fall()
-            self.gameState_string += "fell! " + str(score) + " x" + str(self.combo) + " "
+            self.gameState_string += 'fell! ' + str(score) + ' x' + str(self.combo) + ' '
             self.print_board()
             self.remove_cells = self.get_triplets()
             if len(self.remove_cells):
-                #self.gameState_string += "found triplet! "
+                # self.gameState_string += 'found triplet! '
                 self.is_exploding = True
-        elif move != "":
+        elif move != '':
             x1, y1, x2, y2 = [int(i) for i in move.split()]  # TODO: swap y & x
             self.board[x1][y1], self.board[x2][y2] = (
                 self.board[x2][y2],
                 self.board[x1][y1],
             )
             self.combo = 1
-            self.gameState_string += "moved! " + str(score) + " x" + str(self.combo) + " "
+            self.gameState_string += 'moved! ' + str(score) + ' x' + str(self.combo) + ' '
             self.print_board()
             self.remove_cells = self.get_triplets()
             if len(self.remove_cells):
-                #self.gameState_string += "found triplet! "
+                # self.gameState_string += 'found triplet! '
                 self.is_exploding = True
         else:
             raise Exception(
-                "Edmund McMillen. You little fucker. You made a shit of piece with your trash Isaac. "
-                "It’s fucking bad this trash game. I will become back my money. "
-                "I hope you will in your next time a cow; on a trash farm, you sucker. "
+                'Edmund McMillen. You little fucker. You made a shit of piece with your trash Isaac. '
+                'It’s fucking bad this trash game. I will become back my money. '
+                'I hope you will in your next time a cow; on a trash farm, you sucker. '
             )
 
         self.GameState.append(self.gameState_string)
@@ -83,7 +80,7 @@ class ThreeInRow(Game):
 
     def explode(self):
         for cell in self.remove_cells:
-            self.board[cell[0]][cell[1]] = Gem(cell[0], cell[1], "Empty")
+            self.board[cell[0]][cell[1]] = Gem(cell[0], cell[1], 'Empty')
         self.is_exploding = False
         self.is_falling = True
 
@@ -93,18 +90,18 @@ class ThreeInRow(Game):
             for x in range(ROWS_NUM - 1, -1, -1):
                 x_offset = 1  # actually y_offset, see TODO
                 while y + x_offset <= COLS_NUM - 1:
-                    if self.board[y + x_offset][x].color != "Empty":
+                    if self.board[y + x_offset][x].color != 'Empty':
                         break
                     x_offset += 1
                 x_offset -= 1  # TODO: I hate my life
                 if x_offset != 0:
                     self.board[y + x_offset][x].color = self.board[y][x].color
-                    self.board[y][x].color = "Empty"
+                    self.board[y][x].color = 'Empty'
 
         # now generate random
         for y in range(COLS_NUM):
             for x in range(ROWS_NUM):
-                if self.board[y][x].color == "Empty":
+                if self.board[y][x].color == 'Empty':
                     self.board[y][x].color = random.choice(COLORS)
         self.is_falling = False
 
@@ -115,7 +112,7 @@ class ThreeInRow(Game):
         for y in range(COLS_NUM):
             for x in range(ROWS_NUM):
                 y_add, x_add = 1, 1
-                x_elements= []
+                x_elements = []
                 y_elements = []
                 # check vertical
                 while y + y_add < COLS_NUM:
@@ -154,28 +151,41 @@ class ThreeInRow(Game):
         for y in range(COLS_NUM):
             for x in range(ROWS_NUM):
                 if y + 1 < COLS_NUM:
-                    if self.board[y][x].color != self.board[y+1][x].color:
-                        moves.append(f"{y} {x} {y+1} {x}")
+                    if self.board[y][x].color != self.board[y + 1][x].color:
+                        self.board[y][x].color, self.board[y + 1][x].color = self.board[y + 1][x].color, self.board[y][x].color
+                        if len(self.get_triplets()) > 0:
+                            moves.append(f'{y} {x} {y+1} {x}')
+                        self.board[y][x].color, self.board[y + 1][x].color = self.board[y + 1][x].color, self.board[y][x].color
                 if x + 1 < ROWS_NUM:
-                    if self.board[y][x].color != self.board[y][x+1].color:
-                        moves.append(f"{y} {x} {y} {x+1}")
+                    if self.board[y][x].color != self.board[y][x + 1].color:
+                        self.board[y][x].color, self.board[y][x + 1].color = self.board[y][x + 1].color, self.board[y][x].color
+                        if len(self.get_triplets()) > 0:
+                            moves.append(f'{y} {x} {y} {x+1}')
+                        self.board[y][x].color, self.board[y][x + 1].color = self.board[y][x + 1].color, self.board[y][x].color
         if not moves:
             return ['']
         return moves
+
 
     def show_game(self, start: int, end: int) -> list[str]:
         return self.GameState[start:end]
 
     # X, O, T
     def print_board(self):
-        color_to_ascii = {"r": "X", "g": "O", "b": "T", "m": "M", "y": "Y", "E": "_", "R": "R"}
+        color_to_ascii = {
+            'r': 'X',
+            'g': 'O',
+            'b': 'T',
+            'm': 'M',
+            'y': 'Y',
+            'E': '_',
+            'R': 'R',
+        }
         for i in range(ROWS_NUM):
-            mystring = [
-                color_to_ascii[self.board[i][j].color[0]] for j in range(COLS_NUM)
-            ]
-            self.gameState_string += "".join(mystring) + " "
+            mystring = [color_to_ascii[self.board[i][j].color[0]] for j in range(COLS_NUM)]
+            self.gameState_string += ''.join(mystring) + ' '
 
-        #print(self.gameState_string)
+        # print(self.gameState_string)
         # print()
 
 
@@ -195,11 +205,11 @@ if __name__ == '__main__':
         if len(moves):
             score = g.make_move(random.choice(moves))
         else:
-            score = g.make_move("")
+            score = g.make_move('')
         print(score)
         time.sleep(1)
     with open(r'output.txt', 'w') as fp:
         for item in g.GameState:
-            fp.write("%s\n" % item)
+            fp.write('%s\n' % item)
         print('Done')
     print(g.GameState)

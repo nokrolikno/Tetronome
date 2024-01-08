@@ -5,11 +5,10 @@ import os
 import re
 import math
 
-ascii_to_color = {"X": "red", "O": "green", "T": "blue", "_": "black"}
 ascii_to_sprite = {"X": "cherry", "O": "chockolate", "T": "cupcake", "Y": 'donut', 'M': 'lollipop'}
 
 FPS = 30
-BASE_IMG_DIR = "images/"
+BASE_IMG_DIR = 'images/'
 
 
 class Gem(p.sprite.Sprite):
@@ -18,7 +17,7 @@ class Gem(p.sprite.Sprite):
     def __init__(self, x, y, cell_size, filename):
         p.sprite.Sprite.__init__(self)
         self.cell_size = cell_size
-        regex = re.compile(filename + r"[0-9]+\.png")
+        regex = re.compile(filename + r'[0-9]+\.png')
         self.max_file = 1
         for root, dirs, files in os.walk(BASE_IMG_DIR):
             for file in files:
@@ -26,14 +25,10 @@ class Gem(p.sprite.Sprite):
                     self.max_file = int(file[-6:-4])
         self.state = 1
         self.filename = filename
-        self.image = p.image.load(
-            BASE_IMG_DIR + filename + "{:02d}".format(self.state) + ".png"
-        ).convert_alpha()
-        self.image = p.transform.scale(
-            self.image, (cell_size - self.SMALLNESS, cell_size - self.SMALLNESS)
-        )
+        self.image = p.image.load(BASE_IMG_DIR + filename + '{:02d}'.format(self.state) + '.png').convert_alpha()
+        self.image = p.transform.scale(self.image, (cell_size - self.SMALLNESS, cell_size - self.SMALLNESS))
         self.rect = self.image.get_rect(center=(x + cell_size // 2, y + cell_size // 2))
-        self.action = "stationary"
+        self.action = 'stationary'
         self.a_x, self.a_y, self.b_x, self.b_y = 0, 0, 0, 0
         self.moving_state = 0
         self.dying_state = 0
@@ -42,20 +37,20 @@ class Gem(p.sprite.Sprite):
         return -1.5 * x**2 + 2.5 * x
 
     def update(self):
-        if self.action == "stationary":
+        if self.action == 'stationary':
             if random.random() < 0.1:
                 self.state = (self.state + 1) % self.max_file + 1
                 self.image = p.image.load(
-                    BASE_IMG_DIR + self.filename + "{:02d}".format(self.state) + ".png"
+                    BASE_IMG_DIR + self.filename + '{:02d}'.format(self.state) + '.png'
                 ).convert_alpha()
                 self.image = p.transform.scale(
                     self.image,
                     (self.cell_size - self.SMALLNESS, self.cell_size - self.SMALLNESS),
                 )
-        elif self.action == "moving":
+        elif self.action == 'moving':
             self.moving_state += 1
             if self.moving_state >= 10:
-                self.action = "stationary"
+                self.action = 'stationary'
             start_center_x, start_center_y = (
                 self.a_x + self.cell_size // 2,
                 self.a_y + self.cell_size // 2,
@@ -65,30 +60,26 @@ class Gem(p.sprite.Sprite):
                 self.b_y + self.cell_size // 2,
             )
             new_center_x = start_center_x + int(
-                (end_center_x - start_center_x)
-                * self.moving_function(self.moving_state / 10)
+                (end_center_x - start_center_x) * self.moving_function(self.moving_state / 10)
             )
             new_center_y = start_center_y + int(
-                (end_center_y - start_center_y)
-                * self.moving_function(self.moving_state / 10)
+                (end_center_y - start_center_y) * self.moving_function(self.moving_state / 10)
             )
             self.rect = self.image.get_rect(center=(new_center_x, new_center_y))
-        elif self.action == "dying":
+        elif self.action == 'dying':
             self.dying_state += 1
             if self.dying_state >= 10:
                 self.kill()
             transparency = 128
-            self.image.fill(
-                (255, 255, 255, transparency), special_flags=p.BLEND_RGBA_MULT
-            )
+            self.image.fill((255, 255, 255, transparency), special_flags=p.BLEND_RGBA_MULT)
 
     def move(self, a_x, a_y, b_x, b_y):
         self.a_x, self.a_y, self.b_x, self.b_y = a_x, a_y, b_x, b_y
-        self.action = "moving"
+        self.action = 'moving'
         self.moving_state = 0
 
     def die(self):
-        self.action = "dying"
+        self.action = 'dying'
         self.dying_state = 0
 
 
@@ -135,11 +126,10 @@ class Engine:
         self.x_around_circle = 0
         self.x_around_add = 1
         self.y_around_circle = 10
-
         for i in range(board_size_x):
             col = []
             for j in range(board_size_y):
-                if init_board[j][i] == "_":
+                if init_board[j][i] == '_':
                     col.append(None)
                     continue
                 gem = Gem(
@@ -225,10 +215,7 @@ class Engine:
                     i,
                     self.y_margin,
                     self.GRID_THICKNESS,
-                    self.board_size_y
-                    * (self.WIDTH - 2 * self.x_margin)
-                    // self.board_size_x
-                    + self.GRID_THICKNESS,
+                    self.board_size_y * (self.WIDTH - 2 * self.x_margin) // self.board_size_x + self.GRID_THICKNESS,
                 ),
             )
         for i in range(
@@ -279,23 +266,17 @@ class Engine:
             self.board[i][j].die()
 
     def fall_gems(self, previous_board, board):
-        empty_under = [
-            [0 for j in range(self.board_size_y)] for i in range(self.board_size_x)
-        ]
+        empty_under = [[0 for j in range(self.board_size_y)] for i in range(self.board_size_x)]
         for i in range(self.board_size_x):
             for j in range(self.board_size_y - 1, -1, -1):
                 if j == self.board_size_y - 1:
-                    if previous_board[j][i] == "_":
+                    if previous_board[j][i] == '_':
                         empty_under[i][j] = 1
                     continue
-                empty_under[i][j] = (
-                    empty_under[i][j + 1] + 1
-                    if previous_board[j][i] == "_"
-                    else empty_under[i][j + 1]
-                )
+                empty_under[i][j] = empty_under[i][j + 1] + 1 if previous_board[j][i] == '_' else empty_under[i][j + 1]
         for i in range(self.board_size_x):
             for j in range(self.board_size_y - 1, -1, -1):
-                if empty_under[i][j] != 0 and previous_board[j][i] != "_":
+                if empty_under[i][j] != 0 and previous_board[j][i] != '_':
                     self.board[i][j].move(
                         self.x_margin + self.cell_size * i,
                         self.y_margin + self.cell_size * j,
@@ -321,11 +302,11 @@ class Engine:
     def make_move(self, move_description, score, combo, board):
         self.score += int(score)
         self.combo = combo
-        if move_description == "moved!":
+        if move_description == 'moved!':
             self.move_gems(self.previous_board, board)
-        elif move_description == "exploded!":
+        elif move_description == 'exploded!':
             self.explode_gems(self.previous_board, board)
-        elif move_description == "fell!":
+        elif move_description == 'fell!':
             self.fall_gems(self.previous_board, board)
         self.update_until_beat()
         self.previous_board = board
@@ -346,7 +327,7 @@ class Engine:
 
 
 def main():
-    with open("output.txt", "r") as file:
+    with open('output.txt', 'r') as file:
         lines = file.readlines()
     parts = lines[0].strip().split()
     board = parts[3:]
@@ -362,5 +343,5 @@ def main():
         p.display.flip()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

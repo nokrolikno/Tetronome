@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 
 class Game(ABC):
-
     @abstractmethod
     def get_moves(self) -> list[str]:
         pass
