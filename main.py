@@ -2,11 +2,12 @@ import time
 import numpy as np
 from scipy.io import wavfile
 
+from ThreeInRow.GameUI import make_frames
 from ThreeInRow.ThreeInRow import ThreeInRow
 from search_best.best_music_part_search import MusicSearcher
 from search_best.overlay_best_part import overlay
 from search_best.play_of_the_game_search import HighlightSearcher
-import sounddevice as sd
+from video_maker.video_maker import create_video
 
 
 def pipeline(source):
@@ -24,14 +25,12 @@ def pipeline(source):
             file.write(snapshot.game_position + '\n')
     scaled = np.int16(best_part_music_data / np.max(np.abs(best_part_music_data)) * 32767)
     wavfile.write('ThreeInRow/melody_signal.wav', 44100, scaled)
-    # sd.play(best_part_music_data, music_searcher.sr)
-    # start = time.time()
-    # for snapshot in snapshots:
-    #     while True:
-    #         if time.time() - start > snapshot.video_time:
-    #             print(snapshot.game_position)
-    #             break
-    #         time.sleep(1e-6)
+    bpm = music_searcher.bpm
+    fps = round(bpm / 6)
+    make_frames('ThreeInRow/images/', 'ThreeInRow/output.txt', 'ThreeInRow/tmp_vid/', fps, working_dir='ThreeInRow/')
+    create_video(
+        'ThreeInRow/tmp_vid/', 'best_video_ever.mp4', round(2 * fps * bpm / 120), 'ThreeInRow/melody_signal.wav'
+    )
 
 
 def main():
