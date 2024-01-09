@@ -9,6 +9,7 @@ ascii_to_sprite = {"X": "cherry", "O": "chockolate", "T": "cupcake", "Y": 'donut
 
 FPS = 46
 BASE_IMG_DIR = 'images/'
+WORKING_DIR = './'
 
 
 class Gem(p.sprite.Sprite):
@@ -98,7 +99,6 @@ class Engine:
     TIN_COLOR = COMBO_COLORS[0]
     PINK_COLOR = COMBO_COLORS[1]
 
-
     def __init__(self, board_size_x, board_size_y, x_margin, y_margin, init_board, tmp_vid_folder='tmp_vid/'):
         p.init()
         self.board_size_x = board_size_x
@@ -124,8 +124,8 @@ class Engine:
         self.combo_color_cnt = 0
         self.combo_angle_add = 1
 
-        self.score_font = p.font.Font('AlfaSlabOne-Regular.ttf', y_margin // 2)
-        self.combo_font = p.font.Font('AlfaSlabOne-Regular.ttf', y_margin // 2)
+        self.score_font = p.font.Font(WORKING_DIR + 'AlfaSlabOne-Regular.ttf', y_margin // 2)
+        self.combo_font = p.font.Font(WORKING_DIR + 'AlfaSlabOne-Regular.ttf', y_margin // 2)
 
         # Add rotation around point for Combo (no kak?)
         self.x_around_circle = 0
@@ -153,16 +153,18 @@ class Engine:
         scoreSurfaceObj = self.score_font.render(f'Score: {self.score}', True, (0, 0, 0))
         scoreRectObj = scoreSurfaceObj.get_rect()
         scoreRectObj.topleft = (self.WIDTH // 4, self.y_margin // 4)
-        #self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
+        # self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
         self.screen.blit(scoreSurfaceObj, scoreRectObj)
 
-        myimage = p.image.load("images/chelibobes.png")
+        myimage = p.image.load(BASE_IMG_DIR + "chelibobes.png")
         imagerect = myimage.get_rect()
         imagerect.topleft = (-75, self.HEIGHT * 2 // 3)
         self.screen.blit(myimage, imagerect)
 
     def draw_combo(self):
-        self.combo_font = p.font.Font('AlfaSlabOne-Regular.ttf', min(self.y_margin // 10 + int(self.combo[1:]) * 2, 72))
+        self.combo_font = p.font.Font(
+            WORKING_DIR + 'AlfaSlabOne-Regular.ttf', min(self.y_margin // 10 + int(self.combo[1:]) * 2, 72)
+        )
         self.cur_color = [self.cur_color[i] - int(self.color_diff[i] / 10) for i in range(3)]
         if int(self.combo_color_cnt) == 9:
             self.color_diff = [-self.color_diff[i] for i in range(3)]
@@ -180,19 +182,23 @@ class Engine:
         comboAddSurfaceObj = p.transform.rotate(comboAddSurfaceObj, self.cur_angle)
         comboRectObj = comboSurfaceObj.get_rect()
         comboAddRectObj = comboAddSurfaceObj.get_rect()
-        comboRectObj.center = (self.WIDTH // 2 + self.x_around_circle,
-                               self.y_margin + (self.cell_size * self.board_size_y) // 2 + self.y_around_circle)
-        comboAddRectObj.center = (self.WIDTH // 2 + self.x_around_circle // 1.5,
-                               self.y_margin + (self.cell_size * self.board_size_y) // 2 + self.y_around_circle // 1.5)
+        comboRectObj.center = (
+            self.WIDTH // 2 + self.x_around_circle,
+            self.y_margin + (self.cell_size * self.board_size_y) // 2 + self.y_around_circle,
+        )
+        comboAddRectObj.center = (
+            self.WIDTH // 2 + self.x_around_circle // 1.5,
+            self.y_margin + (self.cell_size * self.board_size_y) // 2 + self.y_around_circle // 1.5,
+        )
 
         self.screen.blit(comboSurfaceObj, comboRectObj)
         self.screen.blit(comboAddSurfaceObj, comboAddRectObj)
         self.combo_color_cnt += 1
         self.cur_angle += self.combo_angle_add
         self.x_around_circle += self.x_around_add
-        y_pos = math.sqrt(100 - min(self.x_around_circle ** 2, 100))
+        y_pos = math.sqrt(100 - min(self.x_around_circle**2, 100))
 
-        self.y_around_circle = y_pos if self.x_around_add == 1 else - y_pos
+        self.y_around_circle = y_pos if self.x_around_add == 1 else -y_pos
 
     def draw_grid(self):
         for i in range(self.board_size_x):
@@ -317,7 +323,6 @@ class Engine:
         self.previous_board = board
 
     def update_until_beat(self):
-
         for i in range(FPS):
             self.screen.fill(self.BACKGROUND_COLOR)
             self.gems.update()
@@ -329,34 +334,38 @@ class Engine:
             self.draw_combo()
 
             p.display.flip()
-            p.image.save(self.screen, 'tmp_vid/{:05d}.png'.format(self.current_frame))
+            p.image.save(self.screen, WORKING_DIR + 'tmp_vid/{:05d}.png'.format(self.current_frame))
             self.current_frame += 1
 
 
-# def make_frames(game_filename, tmp_vid_folder, bpm):
-#     folder_path = tmp_vid_folder
-#     global FPS
-#     FPS = bpm * 10 // 3
-#
-#     all_tmp_vid = os.listdir(folder_path)
-#
-#     for images in all_tmp_vid:
-#         if images.endswith(".png"):
-#             os.remove(os.path.join(folder_path, images))
-#     with open(game_filename, 'r') as file:
-#         lines = file.readlines()
-#     parts = lines[0].strip().split()
-#     board = parts[3:]
-#     engine = Engine(len(board[0]), len(board), 20, 100, board, tmp_vid_folder=tmp_vid_folder)
-#     for line in lines[1:]:
-#         for e in p.event.get():
-#             if e.type == p.QUIT:
-#                 running = False
-#         parts = line.strip().split()
-#         move_description, score, combo, *board = parts
-#         engine.make_move(move_description, score, combo, board)
-#         engine.clock.tick(FPS)
-#         p.display.flip()
+def make_frames(source_dir, game_filename, tmp_vid_folder, fps, working_dir='./'):
+    folder_path = tmp_vid_folder
+    global FPS
+    global BASE_IMG_DIR
+    global WORKING_DIR
+    FPS = fps
+    BASE_IMG_DIR = source_dir
+    WORKING_DIR = working_dir
+
+    all_tmp_vid = os.listdir(folder_path)
+
+    for images in all_tmp_vid:
+        if images.endswith(".png"):
+            os.remove(os.path.join(folder_path, images))
+    with open(game_filename, 'r') as file:
+        lines = file.readlines()
+    parts = lines[0].strip().split()
+    board = parts[3:]
+    engine = Engine(len(board[0]), len(board), 20, 100, board, tmp_vid_folder=tmp_vid_folder)
+    for line in lines[1:]:
+        for e in p.event.get():
+            if e.type == p.QUIT:
+                running = False
+        parts = line.strip().split()
+        move_description, score, combo, *board = parts
+        engine.make_move(move_description, score, combo, board)
+        engine.clock.tick(FPS)
+        p.display.flip()
 
 
 def main():
