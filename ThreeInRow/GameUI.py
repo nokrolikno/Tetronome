@@ -88,6 +88,53 @@ class Gem(p.sprite.Sprite):
         self.dying_state = 0
 
 
+class Shard(p.sprite.Sprite):
+    COLOR_CHOICE = [
+        (168, 216, 255),
+        (204, 204, 255),
+        (238, 190, 241),
+        (168, 255, 210),
+        (203, 255, 247),
+        (173, 255, 255),
+    ]
+    SURFACE_WIDTH, SURFACE_HEIGHT = 10, 10
+    WHITE = (255, 255, 255)
+
+    def __init__(self, center: tuple[int, int], end: tuple[int, int], cell_size):
+        p.sprite.Sprite.__init__(self)
+        self.image = p.Surface((self.SURFACE_WIDTH, self.SURFACE_HEIGHT))
+        self.image.fill(self.WHITE)
+        self.image.set_colorkey(self.WHITE)
+        p.draw.circle(
+            self.image, random.choice(self.COLOR_CHOICE), (self.SURFACE_WIDTH // 2, self.SURFACE_HEIGHT // 2), 4
+        )
+        self.start = (center[0] + cell_size // 2, center[1] + cell_size // 2)
+        self.end = end
+        self.rect = self.image.get_rect()
+        self.rect.center = self.start
+        self.a = 1000 * random.random() - 500
+        self.b = -self.a
+        self.steps = random.randint(10, 20)
+        self.step = 0
+
+    def update(self) -> None:
+        basic_x_vector = (self.end[0] - self.start[0], self.end[1] - self.start[1])
+        cos_alpha = basic_x_vector[0] / (math.sqrt(basic_x_vector[0] ** 2 + basic_x_vector[1] ** 2))
+        alpha = math.acos(cos_alpha)
+        func_x = self.step / self.steps
+        func_y = self.a * func_x**2 + self.b * func_x
+        func_vector = (
+            func_x * math.cos(alpha) - func_y * math.sin(alpha),
+            func_x * math.sin(alpha) + func_y * math.cos(alpha),
+        )
+        new_x = self.start[0] + int((self.end[0] - self.start[0]) * self.step / self.steps + func_vector[0])
+        new_y = self.start[1] + int((self.end[1] - self.start[1]) * self.step / self.steps + func_vector[1])
+        self.rect.center = (new_x, new_y)
+        self.step += 1
+        if self.step > self.steps:
+            self.kill()
+
+
 class Engine:
     WIDTH, HEIGHT = 560, 900
     GRID_COLOR = (128, 128, 128)
@@ -116,6 +163,7 @@ class Engine:
 
         # Score & Combo stuff
         self.score = random.randint(10, 1000)
+        self.score_top_left = (self.WIDTH // 4, self.y_margin // 4)
         self.current_frame = 0
         self.combo = 'x1'
         self.color_diff = [self.TIN_COLOR[i] - self.PINK_COLOR[i] for i in range(3)]
@@ -152,7 +200,7 @@ class Engine:
     def draw_score(self):
         scoreSurfaceObj = self.score_font.render(f'Score: {self.score}', True, (0, 0, 0))
         scoreRectObj = scoreSurfaceObj.get_rect()
-        scoreRectObj.topleft = (self.WIDTH // 4, self.y_margin // 4)
+        scoreRectObj.topleft = self.score_top_left
         # self.screen.fill(self.BACKGROUND_COLOR, (0, 0, self.WIDTH, self.y_margin))
         self.screen.blit(scoreSurfaceObj, scoreRectObj)
 
@@ -275,6 +323,17 @@ class Engine:
                     exploded.append((i, j))
         for i, j in exploded:
             self.board[i][j].die()
+            combo = int(self.combo[1:]) // 2
+            [
+                self.gems.add(
+                    Shard(
+                        (self.x_margin + self.cell_size * i, self.y_margin + self.cell_size * j),
+                        (self.WIDTH // 2, self.y_margin // 2),
+                        self.cell_size,
+                    )
+                )
+                for _ in range(combo)
+            ]
 
     def fall_gems(self, previous_board, board):
         empty_under = [[0 for j in range(self.board_size_y)] for i in range(self.board_size_x)]
@@ -334,7 +393,7 @@ class Engine:
             self.draw_combo()
 
             p.display.flip()
-            p.image.save(self.screen, WORKING_DIR + 'tmp_vid/{:05d}.png'.format(self.current_frame))
+            # p.image.save(self.screen, WORKING_DIR + 'tmp_vid/{:05d}.png'.format(self.current_frame))
             self.current_frame += 1
 
 
