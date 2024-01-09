@@ -11,7 +11,8 @@ source/*.mp3
 source/*.wav
 source/tmp/*.mp3
 source/tmp/*.wav
-source/RazyebassGrave/
+source/RazyebassGrave
+/source/tmp/RazyebassGrave/
 */__pycache__/
 ThreeInRow/images/*.png
 ThreeInRow/output.txt
@@ -21,3 +22,5 @@ ThreeInRow/*.wav
 ThreeInRow/*.mp4
 best_video_ever.mp4
 tmp_best_video_ever.mp4
+RazyebassVideos/
+tmp_RazyebassVideos/
