@@ -393,7 +393,7 @@ class Engine:
             self.draw_combo()
 
             p.display.flip()
-            # p.image.save(self.screen, WORKING_DIR + 'tmp_vid/{:05d}.png'.format(self.current_frame))
+            p.image.save(self.screen, WORKING_DIR + 'tmp_vid/{:05d}.png'.format(self.current_frame))
             self.current_frame += 1
 
 
